@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Web GUI</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <!-- <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: black;
+            transition: filter 0.5s ease; /* Add transition effect for brightness changes */
+        }
+        .canvas-container {
+            position: relative;
+        }
+        canvas {
+            border: 1px solid lightgrey;
+            border-radius: 100%;
+        }
+        #angleInput {
+            width: 50px;
+        }
+        #brightnessInput {
+            width: 50px;
+        }
+        .topinputs {
+            margin-top: 5%;
+        }
+    </style> -->
+</head>
+<body style="text-align: center;">
+    <h1>Serial Port Input Example</h1>
+    <button id="connectButton">Connect to Serial Port</button>
+    <div id="dataDisplay"></div>
+    <script>
+            document.addEventListener('DOMContentLoaded', () => {
+        const connectButton = document.getElementById('connectButton');
+        const dataDisplay = document.getElementById('dataDisplay');
+        let port;
+
+        async function connectToSerialPort() {
+            try {
+            // Specify the filter to target COM1
+            const filters = [
+                { usbVendorId: 0x1234, usbProductId: 0x5678, serialNumber: 'COM1' } // Replace with actual USB vendor/product IDs if applicable
+            ];
+
+            port = await navigator.serial.requestPort({ filters });
+            await port.open({ baudRate: 9600 }); // Set the desired baud rate
+
+            while (port.readable) {
+                const reader = port.readable.getReader();
+                try {
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) {
+                    break;
+                    }
+                    // Display the received data in the dataDisplay div
+                    dataDisplay.textContent += value;
+                }
+                } finally {
+                reader.releaseLock();
+                }
+            }
+            } catch (error) {
+            console.error(error);
+            }
+        }
+
+        connectButton.addEventListener('click', () => {
+            if (!port) {
+            connectToSerialPort();
+            connectButton.textContent = 'Disconnect from Serial Port';
+            } else {
+            port.close();
+            port = null;
+            connectButton.textContent = 'Connect to Serial Port';
+            }
+        });
+        });
+
+    </script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+</body>
+</html>
